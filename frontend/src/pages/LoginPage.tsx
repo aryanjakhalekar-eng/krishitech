@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { apiClient } from '../api/client';
 import { Shield, Lock, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,7 +39,7 @@ export const LoginPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check credentials.');
+      setError(err.response?.data?.detail || (language === 'mr' ? 'लॉगिन अयशस्वी झाले. कृपया ईमेल व पासवर्ड तपासा.' : 'Login failed. Please check credentials.'));
     } finally {
       setLoading(false);
     }
@@ -56,8 +58,12 @@ export const LoginPage: React.FC = () => {
           <div className="w-12 h-12 bg-agri-800 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center mb-3 shadow">
             <Shield className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900">Welcome Back</h2>
-          <p className="text-xs text-gray-500 mt-1">Sign in to KrishiRakshak AI Platform</p>
+          <h2 className="text-2xl font-extrabold text-gray-900">
+            {t('auth.loginTitle', 'Sign In to KrishiRakshak')}
+          </h2>
+          <p className="text-xs text-gray-500 mt-1">
+            {t('auth.loginSubtitle', 'Access your farm dashboard, disease history, and officer consultations.')}
+          </p>
         </div>
 
         {error && (
@@ -68,7 +74,9 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('auth.emailLabel', 'Email Address')}
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
               <input
@@ -83,7 +91,9 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('auth.passwordLabel', 'Password')}
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
               <input
@@ -102,7 +112,7 @@ export const LoginPage: React.FC = () => {
             disabled={loading}
             className="w-full py-3 bg-agri-800 hover:bg-agri-900 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
           >
-            {loading ? 'Authenticating...' : 'Sign In'}
+            {loading ? t('auth.signingIn', 'Authenticating...') : t('auth.signInBtn', 'Sign In to Dashboard')}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -110,39 +120,45 @@ export const LoginPage: React.FC = () => {
         {/* Quick Demo Credentials */}
         <div className="mt-8 pt-6 border-t border-gray-100">
           <p className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 mb-3 text-center">
-            Quick Demo Credentials
+            {t('auth.demoPillsTitle', 'Quick Demo Credentials')}
           </p>
           <div className="space-y-2">
             <button
               onClick={() => setDemoCreds('farmer@krishirakshak.in', 'farmer123')}
               className="w-full text-left text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-3 py-2 rounded-xl border border-emerald-200 font-medium flex justify-between items-center"
             >
-              <span>🧑‍🌾 Farmer (Ramesh Patil)</span>
-              <span className="text-[10px] font-mono bg-emerald-200 px-1.5 py-0.5 rounded">Select</span>
+              <span>🧑‍🌾 {t('auth.farmerPill', 'Farmer (Pune)')}</span>
+              <span className="text-[10px] font-mono bg-emerald-200 px-1.5 py-0.5 rounded">
+                {language === 'mr' ? 'निवडा' : 'Select'}
+              </span>
             </button>
 
             <button
               onClick={() => setDemoCreds('officer@krishirakshak.in', 'officer123')}
               className="w-full text-left text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 px-3 py-2 rounded-xl border border-amber-200 font-medium flex justify-between items-center"
             >
-              <span>👮 Extension Officer (Gram Sevak)</span>
-              <span className="text-[10px] font-mono bg-amber-200 px-1.5 py-0.5 rounded">Select</span>
+              <span>👮 {t('auth.officerPill', 'Extension Officer (Baramati)')}</span>
+              <span className="text-[10px] font-mono bg-amber-200 px-1.5 py-0.5 rounded">
+                {language === 'mr' ? 'निवडा' : 'Select'}
+              </span>
             </button>
 
             <button
               onClick={() => setDemoCreds('admin@krishirakshak.in', 'admin123')}
               className="w-full text-left text-xs bg-blue-50 hover:bg-blue-100 text-blue-900 px-3 py-2 rounded-xl border border-blue-200 font-medium flex justify-between items-center"
             >
-              <span>🏛️ Admin & GIS Officer</span>
-              <span className="text-[10px] font-mono bg-blue-200 px-1.5 py-0.5 rounded">Select</span>
+              <span>🏛️ {t('auth.adminPill', 'Admin (State HQ)')}</span>
+              <span className="text-[10px] font-mono bg-blue-200 px-1.5 py-0.5 rounded">
+                {language === 'mr' ? 'निवडा' : 'Select'}
+              </span>
             </button>
           </div>
         </div>
 
         <div className="mt-6 text-center text-xs text-gray-500">
-          Don't have an account?{' '}
+          {t('auth.noAccount', "Don't have an account?")}{' '}
           <Link to="/register" className="font-bold text-agri-800 hover:underline">
-            Register here
+            {t('auth.registerLink', 'Register as Farmer')}
           </Link>
         </div>
 

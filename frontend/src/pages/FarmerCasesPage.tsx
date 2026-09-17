@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedCrop, getLocalizedDisease, getLocalizedSeverity } from '../utils/diseaseTranslations';
 import { apiClient, resolveImageUrl } from '../api/client';
 import { DiseaseCase } from '../types';
 import { FileText, AlertCircle, CheckCircle2, Clock, ChevronRight, Shield, Image as ImageIcon } from 'lucide-react';
 
 export const FarmerCasesPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [cases, setCases] = useState<DiseaseCase[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,19 +31,21 @@ export const FarmerCasesPage: React.FC = () => {
       <div className="bg-gradient-to-r from-agri-900 to-agri-800 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs bg-white/10 text-emerald-300 font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            Farmer Case Tracking
+            {language === 'mr' ? 'शेतकरी केस ट्रॅकिंग' : 'Farmer Case Tracking'}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-2">
-            My Escalated Crop Scans
+            {t('cases.title', 'Extension Officer Consultations')}
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-100/80 mt-1">
-            Track status updates and physical verification notes from your local Gram Sevak / Agricultural Extension Officer.
+          <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 max-w-xl">
+            {t('cases.subtitle', 'Track scan cases flagged by the AI Safety Gate for manual review by your local Gram Sevak or Agricultural Officer.')}
           </p>
         </div>
 
         <div className="bg-white/10 p-4 rounded-2xl border border-white/20 text-center min-w-[130px]">
           <span className="text-3xl font-extrabold text-emerald-400">{cases.length}</span>
-          <p className="text-[11px] text-emerald-200 font-bold uppercase tracking-wider">Total Cases</p>
+          <p className="text-[11px] text-emerald-200 font-bold uppercase tracking-wider">
+            {language === 'mr' ? 'एकूण केसेस' : 'Total Cases'}
+          </p>
         </div>
       </div>
 
@@ -53,13 +58,14 @@ export const FarmerCasesPage: React.FC = () => {
               <div key={c.id} className="bg-white rounded-2xl border border-earth-100 shadow-sm p-6 space-y-4 hover:border-emerald-500 transition-all">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-gray-900 text-base">Case #{c.id}</span>
+                    <span className="font-extrabold text-gray-900 text-base">{t('cases.caseNum', 'Case ID')} #{c.id}</span>
                     <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                       c.status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
                       c.status === 'UNDER_REVIEW' ? 'bg-blue-100 text-blue-800' :
                       'bg-amber-100 text-amber-800'
                     }`}>
-                      {c.status}
+                      {c.status === 'VERIFIED' ? t('cases.statusVerified', 'Verified by Officer') :
+                       c.status === 'PENDING' ? t('cases.statusPending', 'Pending Review') : c.status}
                     </span>
                   </div>
                   <span className="text-xs text-gray-400 font-mono">
@@ -76,24 +82,24 @@ export const FarmerCasesPage: React.FC = () => {
                     )}
                   </div>
                   <div className="col-span-2 space-y-1 text-xs text-gray-700">
-                    <p>🌱 Crop: <span className="font-bold text-emerald-800">{c.crop}</span></p>
-                    <p>🤖 Suspected: <span className="font-bold text-red-700">{c.predicted_disease}</span></p>
+                    <p>🌱 {language === 'mr' ? 'पीक' : 'Crop'}: <span className="font-bold text-emerald-800">{getLocalizedCrop(c.crop, language)}</span></p>
+                    <p>🤖 {language === 'mr' ? 'संशयित रोग' : 'Suspected'}: <span className="font-bold text-red-700">{getLocalizedDisease(c.crop, c.predicted_disease, language)}</span></p>
                     {c.verified_disease && (
-                      <p>✅ Verified: <span className="font-bold text-emerald-700">{c.verified_disease}</span></p>
+                      <p>✅ {language === 'mr' ? 'सत्यापित' : 'Verified'}: <span className="font-bold text-emerald-700">{getLocalizedDisease(c.crop, c.verified_disease, language)}</span></p>
                     )}
-                    <p>⚠️ Severity: <span className="font-bold text-amber-800">{c.severity}</span></p>
+                    <p>⚠️ {language === 'mr' ? 'तीव्रता' : 'Severity'}: <span className="font-bold text-amber-800">{getLocalizedSeverity(c.severity, language)}</span></p>
                   </div>
                 </div>
 
                 {c.officer_notes && (
                   <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-emerald-900 text-xs mt-2">
-                    <strong>Gram Sevak Officer Notes:</strong>
+                    <strong>{language === 'mr' ? 'ग्रामसेवक कृषी अधिकारी सल्ला:' : 'Gram Sevak Officer Notes:'}</strong>
                     <p className="mt-0.5">{c.officer_notes}</p>
                   </div>
                 )}
                 {c.escalation_reason && !c.officer_notes && (
                   <div className="bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-amber-900 text-[11px] font-medium mt-2">
-                    <strong>Escalation Reason:</strong> {c.escalation_reason}
+                    <strong>{language === 'mr' ? 'पाठवण्याचे कारण:' : 'Escalation Reason:'}</strong> {c.escalation_reason}
                   </div>
                 )}
               </div>
@@ -103,8 +109,12 @@ export const FarmerCasesPage: React.FC = () => {
       ) : (
         <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
           <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-          <h3 className="font-bold text-gray-900 text-lg">No Escalated Cases</h3>
-          <p className="text-xs text-gray-500 mt-1">All your crop disease scans passed automated verification or none are pending review.</p>
+          <h3 className="font-bold text-gray-900 text-lg">
+            {language === 'mr' ? 'कोणतीही प्रलंबित केस नाही' : 'No Escalated Cases'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-1">
+            {t('cases.noCases', 'No escalated cases found. All scans passed automated safety thresholds.')}
+          </p>
         </div>
       )}
     </div>

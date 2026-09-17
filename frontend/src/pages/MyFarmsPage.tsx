@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedCrop } from '../utils/diseaseTranslations';
 import { apiClient } from '../api/client';
 import { Farm } from '../types';
 import { Sprout, Plus, MapPin, Layers } from 'lucide-react';
 
 export const MyFarmsPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [farms, setFarms] = useState<Farm[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,16 +31,18 @@ export const MyFarmsPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
             <Sprout className="w-6 h-6 text-emerald-600" />
-            My Farms & Plots
+            {t('farms.title', 'My Farms & Plots')}
           </h1>
-          <p className="text-xs text-gray-500 mt-0.5">Manage your registered crop land for location-based disease risk intelligence.</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {t('farms.subtitle', 'Register and track individual fields for localized disease management and micro-weather intelligence.')}
+          </p>
         </div>
 
         <Link
           to="/add-farm"
           className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition-all"
         >
-          <Plus className="w-4 h-4" /> Add New Farm Plot
+          <Plus className="w-4 h-4" /> {t('farms.addFarmBtn', 'Add New Field')}
         </Link>
       </div>
 
@@ -48,7 +53,7 @@ export const MyFarmsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-base text-gray-900">{f.farm_name}</span>
                 <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {f.crop}
+                  {getLocalizedCrop(f.crop, language)}
                 </span>
               </div>
 
@@ -59,7 +64,9 @@ export const MyFarmsPage: React.FC = () => {
                 </p>
                 <p className="flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-gray-400" />
-                  <span>{f.area_acres} Acres • {f.soil_type} • Variety: {f.variety || 'N/A'}</span>
+                  <span>
+                    {f.area_acres} {language === 'mr' ? 'एकर' : 'Acres'} • {f.soil_type} • {language === 'mr' ? 'वाण' : 'Variety'}: {f.variety || 'N/A'}
+                  </span>
                 </p>
               </div>
 
@@ -68,7 +75,7 @@ export const MyFarmsPage: React.FC = () => {
                   to={`/scan?farm_id=${f.id}&crop=${f.crop}`}
                   className="block w-full text-center py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 transition-colors"
                 >
-                  📷 Scan Crop for this Farm
+                  📷 {language === 'mr' ? 'या शेतासाठी पीक तपासा' : 'Scan Crop for this Farm'}
                 </Link>
               </div>
             </div>
@@ -77,10 +84,14 @@ export const MyFarmsPage: React.FC = () => {
       ) : (
         <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
           <Sprout className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-          <h3 className="font-bold text-gray-900 text-lg">No Farms Registered</h3>
-          <p className="text-xs text-gray-500 mt-1 mb-4">Add your farm plots to get localized micro-climate advisories.</p>
+          <h3 className="font-bold text-gray-900 text-lg">
+            {language === 'mr' ? 'कोणतेही शेत नोंदणीकृत नाही' : 'No Farms Registered'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 mb-4">
+            {t('farms.noFarms', 'No registered farms yet. Add your first farm plot to track crop health history.')}
+          </p>
           <Link to="/add-farm" className="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow">
-            Add Farm Now
+            {t('farms.addFarmBtn', 'Add New Field')}
           </Link>
         </div>
       )}

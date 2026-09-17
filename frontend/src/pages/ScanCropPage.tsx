@@ -1,10 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useOffline } from '../contexts/OfflineContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { apiClient } from '../api/client';
 import { Camera, Upload, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { getLocalizedCrop } from '../utils/diseaseTranslations';
 
 export const ScanCropPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [searchParams] = useSearchParams();
   const [selectedCrop, setSelectedCrop] = useState<string>(searchParams.get('crop') || 'Tomato');
   const [selectedFarmId, setSelectedFarmId] = useState<number | undefined>(
@@ -57,7 +60,7 @@ export const ScanCropPage: React.FC = () => {
 
   const handleAnalyze = async () => {
     if (!imageBase64) {
-      setError('Please capture or upload a crop leaf image.');
+      setError(t('scan.errorEmpty', 'Please capture or upload a crop leaf image.'));
       return;
     }
 
@@ -72,7 +75,7 @@ export const ScanCropPage: React.FC = () => {
         image_base64: imageBase64
       });
       setLoading(false);
-      alert('Offline mode active. Your scan has been saved locally and will auto-sync when internet returns.');
+      alert(t('scan.offlineQueued', 'Offline mode active. Your scan has been saved locally and will auto-sync when internet returns.'));
       navigate('/dashboard');
       return;
     }
@@ -87,7 +90,7 @@ export const ScanCropPage: React.FC = () => {
       // Navigate to Disease Result screen with state
       navigate('/scan-result', { state: { result: res.data } });
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Image analysis failed. Please try again.');
+      setError(err.response?.data?.detail || (language === 'mr' ? 'प्रतिमा विश्लेषण अयशस्वी झाले. कृपया पुन्हा प्रयत्न करा.' : 'Image analysis failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -99,10 +102,10 @@ export const ScanCropPage: React.FC = () => {
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-extrabold text-gray-900 flex items-center justify-center gap-2">
           <Camera className="w-8 h-8 text-emerald-600" />
-          Scan Crop Leaf
+          {t('scan.title', 'Scan Crop Leaf')}
         </h1>
-        <p className="text-xs sm:text-sm text-gray-600 max-w-lg mx-auto">
-          Take a clear photograph of the diseased crop leaf for instant AI Safety Gate classification & stepped IPM advisory.
+        <p className="text-xs sm:text-sm text-gray-600 max-w-lg mx-auto leading-relaxed">
+          {t('scan.subtitle', 'Take a clear photograph of the diseased crop leaf for instant AI Safety Gate classification & stepped IPM advisory.')}
         </p>
       </div>
 
@@ -117,8 +120,12 @@ export const ScanCropPage: React.FC = () => {
         {/* Crop Selection */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold text-gray-700 uppercase">Target Crop for Diagnosis</label>
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Supported: Tomato, Rice, Soybean & Grape</span>
+            <label className="block text-xs font-bold text-gray-700 uppercase">
+              {t('scan.selectCrop', 'Target Crop for Diagnosis')}
+            </label>
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+              {t('scan.supportedCrops', 'Supported: Tomato, Rice, Soybean & Grape')}
+            </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {['Tomato', 'Rice', 'Soybean', 'Grape'].map(c => (
@@ -129,7 +136,7 @@ export const ScanCropPage: React.FC = () => {
                 className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all border flex items-center justify-center gap-2 ${selectedCrop === c ? 'bg-agri-800 text-white border-agri-800 shadow-md ring-2 ring-emerald-500/20' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'}`}
               >
                 <span>{c === 'Tomato' ? '🍅' : c === 'Rice' ? '🌾' : c === 'Soybean' ? '🌱' : '🍇'}</span>
-                <span>{c}</span>
+                <span>{getLocalizedCrop(c, language)}</span>
               </button>
             ))}
           </div>
@@ -144,7 +151,7 @@ export const ScanCropPage: React.FC = () => {
                 type="button"
                 onClick={() => setImageBase64(null)}
                 className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600"
-                title="Remove photo"
+                title={t('scan.removePhoto', 'Remove photo')}
               >
                 ✕
               </button>
@@ -155,8 +162,8 @@ export const ScanCropPage: React.FC = () => {
                 <Upload className="w-8 h-8" />
               </div>
               <div>
-                <p className="font-bold text-sm text-gray-900">Upload or Snap Photo</p>
-                <p className="text-xs text-gray-500 mt-0.5">JPEG, PNG up to 10MB</p>
+                <p className="font-bold text-sm text-gray-900">{t('scan.uploadTitle', 'Upload or Snap Photo')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('scan.uploadSubtitle', 'JPEG, PNG up to 10MB')}</p>
               </div>
 
               <input
@@ -173,35 +180,37 @@ export const ScanCropPage: React.FC = () => {
                 onClick={() => fileInputRef.current?.click()}
                 className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all"
               >
-                Choose Image / Camera
+                {t('scan.chooseBtn', 'Choose Image / Camera')}
               </button>
             </div>
           )}
 
           {/* Quick Demo Image Selectors */}
           <div className="pt-4 border-t border-emerald-100">
-            <span className="text-[11px] font-bold text-gray-500 block mb-2">Preset Sample Leaf Photos:</span>
+            <span className="text-[11px] font-bold text-gray-500 block mb-2">
+              {t('scan.presetTitle', 'Preset Sample Leaf Photos:')}
+            </span>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => handleSampleImage('clear')}
                 className="px-3 py-1.5 bg-white border border-emerald-300 text-emerald-900 text-xs font-bold rounded-lg shadow-sm hover:bg-emerald-50"
               >
-                🌿 Clear Leaf (PASS Demo)
+                {t('scan.clearPreset', '🌿 Clear Leaf (PASS Demo)')}
               </button>
               <button
                 type="button"
                 onClick={() => handleSampleImage('blurry')}
                 className="px-3 py-1.5 bg-white border border-amber-300 text-amber-900 text-xs font-bold rounded-lg shadow-sm hover:bg-amber-50"
               >
-                🌫️ Blurry Leaf (IQA Retry)
+                {t('scan.blurryPreset', '🌫️ Blurry Leaf (IQA Retry)')}
               </button>
               <button
                 type="button"
                 onClick={() => handleSampleImage('ood')}
                 className="px-3 py-1.5 bg-white border border-blue-300 text-blue-900 text-xs font-bold rounded-lg shadow-sm hover:bg-blue-50"
               >
-                ❓ Rare / OOD Sample
+                {t('scan.oodPreset', '❓ Rare / OOD Sample')}
               </button>
             </div>
           </div>
@@ -217,11 +226,11 @@ export const ScanCropPage: React.FC = () => {
           {loading ? (
             <>
               <RefreshCw className="w-5 h-5 animate-spin" />
-              <span>Analyzing Image Quality & AI Confidence...</span>
+              <span>{t('scan.analyzing', 'Analyzing Image Quality & AI Confidence...')}</span>
             </>
           ) : (
             <>
-              <span>Run AI Disease Analysis</span>
+              <span>{t('scan.runAnalysis', 'Run AI Disease Analysis')}</span>
               <ArrowRight className="w-5 h-5" />
             </>
           )}

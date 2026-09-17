@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedCrop, getLocalizedDisease } from '../utils/diseaseTranslations';
 import { apiClient, resolveImageUrl } from '../api/client';
 import { CropScan } from '../types';
 import { Camera, Calendar, ShieldCheck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 
 export const ScanHistoryPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [scans, setScans] = useState<CropScan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,9 +29,11 @@ export const ScanHistoryPage: React.FC = () => {
       <div>
         <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
           <Camera className="w-6 h-6 text-emerald-600" />
-          Crop Scan History
+          {t('history.title', 'Crop Scan History')}
         </h1>
-        <p className="text-xs text-gray-500 mt-0.5">Chronological record of all crop leaf scans and AI Safety Gate evaluations.</p>
+        <p className="text-xs text-gray-500 mt-0.5">
+          {t('history.subtitle', 'Chronological record of all crop leaf scans and AI Safety Gate evaluations.')}
+        </p>
       </div>
 
       {scans.length > 0 ? (
@@ -48,12 +53,14 @@ export const ScanHistoryPage: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-base text-gray-900">{s.crop}</span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-mono">Scan #{s.id}</span>
+                      <span className="font-extrabold text-base text-gray-900">{getLocalizedCrop(s.crop, language)}</span>
+                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-mono">#{s.id}</span>
                     </div>
-                    <h4 className="font-bold text-sm text-emerald-800 mt-0.5">{s.predicted_disease}</h4>
+                    <h4 className="font-bold text-sm text-emerald-800 mt-0.5">
+                      {getLocalizedDisease(s.crop, s.predicted_disease, language)}
+                    </h4>
                     <p className="text-xs text-gray-500 mt-1">
-                      Confidence: {(s.confidence * 100).toFixed(0)}% • Severity: {s.severity} ({s.affected_area_percent}%) • IQA: {s.iqa_status} ({s.iqa_score})
+                      {language === 'mr' ? 'अचूकता' : 'Confidence'}: {(s.confidence * 100).toFixed(0)}% • {language === 'mr' ? 'तीव्रता' : 'Severity'}: {s.severity} ({s.affected_area_percent}%) • IQA: {s.iqa_status}
                     </p>
                   </div>
                 </div>
@@ -61,7 +68,9 @@ export const ScanHistoryPage: React.FC = () => {
               <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-0 pt-2 sm:pt-0">
                 <div className="text-right">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${s.safety_gate_action === 'AUTOMATED_ADVISORY' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {s.safety_gate_action === 'AUTOMATED_ADVISORY' ? 'AI PASSED' : 'HUMAN ESCALATED'}
+                    {s.safety_gate_action === 'AUTOMATED_ADVISORY' 
+                      ? (language === 'mr' ? 'सुरक्षित (AI PASSED)' : 'AI PASSED')
+                      : (language === 'mr' ? 'अधिकारी तपासणी (ESCALATED)' : 'HUMAN ESCALATED')}
                   </span>
                   <p className="text-[11px] text-gray-400 mt-1 flex items-center justify-end gap-1">
                     <Calendar className="w-3 h-3" />
@@ -77,8 +86,12 @@ export const ScanHistoryPage: React.FC = () => {
       ) : (
         <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
           <Camera className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-          <h3 className="font-bold text-gray-900 text-lg">No Scans Available</h3>
-          <p className="text-xs text-gray-500 mt-1">Scan a crop leaf photograph to record your first crop scan.</p>
+          <h3 className="font-bold text-gray-900 text-lg">
+            {language === 'mr' ? 'कोणतेही स्कॅन उपलब्ध नाही' : 'No Scans Available'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-1">
+            {t('history.noHistory', 'No scans recorded yet. Perform your first scan to start your crop health timeline.')}
+          </p>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { IQAResult } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Sparkles, Eye, AlertCircle } from 'lucide-react';
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const IQAGauge: React.FC<Props> = ({ iqa }) => {
+  const { t, language } = useLanguage();
   const isGood = iqa.is_usable;
 
   return (
@@ -19,18 +21,20 @@ export const IQAGauge: React.FC<Props> = ({ iqa }) => {
             <AlertCircle className="w-5 h-5 text-red-600" />
           )}
           <span className="font-bold text-sm text-gray-900">
-            Image Quality Assessment (IQA)
+            {t('iqa.title', 'Image Quality Assessment (IQA)')}
           </span>
         </div>
         <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full ${isGood ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
-          {iqa.status}
+          {isGood 
+            ? (language === 'mr' ? 'फोटो योग्य (PASS)' : (iqa.status || 'PASS'))
+            : (language === 'mr' ? 'पुन्हा काढा (RETRY)' : (iqa.status || 'RETRY'))}
         </span>
       </div>
 
       <div className="mt-3">
         <div className="flex justify-between text-xs text-gray-600 mb-1">
-          <span>Blur Variance: {iqa.blur_variance}</span>
-          <span>Score: {(iqa.iqa_score * 100).toFixed(0)}%</span>
+          <span>{language === 'mr' ? 'अस्पष्टता भिन्नता' : 'Blur Variance'}: {iqa.blur_variance}</span>
+          <span>{language === 'mr' ? 'गुणवत्ता स्कोअर' : 'Score'}: {(iqa.iqa_score * 100).toFixed(0)}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
           <div
@@ -39,7 +43,11 @@ export const IQAGauge: React.FC<Props> = ({ iqa }) => {
           />
         </div>
       </div>
-      <p className="text-xs text-gray-600 mt-2 italic">{iqa.message}</p>
+      <p className="text-xs text-gray-600 mt-2 italic">
+        {language === 'mr' 
+          ? (isGood ? t('iqa.goodTip', 'पानाचे स्पष्ट चित्र. रोग ओळखण्यास योग्य.') : t('iqa.blurryTip', 'फोटो अस्पष्ट किंवा धूसर आहे. कृपया जवळून आणि स्थिर हातांनी पुन्हा फोटो काढा.'))
+          : iqa.message}
+      </p>
     </div>
   );
 };

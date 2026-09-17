@@ -98,18 +98,36 @@ export const Navbar: React.FC = () => {
 
           {/* Right Controls: Language Selector & User Profile / Login */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Language Dropdown */}
-            <div className="relative flex items-center bg-white/10 rounded-lg px-2.5 py-1.5 border border-white/15 text-xs font-medium">
-              <Globe className="w-3.5 h-3.5 text-emerald-300 mr-1.5" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as 'en' | 'mr' | 'hi')}
-                className="bg-transparent text-white border-none focus:outline-none cursor-pointer pr-1"
-              >
-                <option value="en" className="text-gray-900">English</option>
-                <option value="mr" className="text-gray-900">मराठी</option>
-                <option value="hi" className="text-gray-900">हिंदी</option>
-              </select>
+            {/* Prominent Language Switcher */}
+            <div className="flex items-center bg-white/10 hover:bg-white/15 rounded-xl p-1 border border-white/20 transition-all shadow-inner">
+              <span className="flex items-center gap-1.5 px-2 text-xs font-bold text-emerald-200">
+                <Globe className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden lg:inline">{language === 'mr' ? 'भाषा' : 'Language'}:</span>
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setLanguage('en')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    language === 'en'
+                      ? 'bg-emerald-500 text-white shadow-md'
+                      : 'text-emerald-100 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('mr')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    language === 'mr'
+                      ? 'bg-emerald-500 text-white shadow-md'
+                      : 'text-emerald-100 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  मराठी
+                </button>
+              </div>
             </div>
 
             {/* Auth Actions */}
@@ -117,7 +135,9 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-2 pl-2 border-l border-white/20">
                 <div className="text-right">
                   <p className="text-xs font-bold text-white">{user?.full_name}</p>
-                  <p className="text-[10px] text-emerald-300 font-medium">{t(`roles.${user?.role.toLowerCase()}`)}</p>
+                  <p className="text-[10px] text-emerald-300 font-medium">
+                    {t(`roles.${user?.role.toLowerCase()}`, user?.role)}
+                  </p>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -139,21 +159,29 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button & Mobile Language Toggle */}
           <div className="flex md:hidden items-center gap-2">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as 'en' | 'mr' | 'hi')}
-              className="bg-white/10 text-white text-xs rounded px-2 py-1 border border-white/20 focus:outline-none"
-            >
-              <option value="en" className="text-gray-900">EN</option>
-              <option value="mr" className="text-gray-900">मराठी</option>
-              <option value="hi" className="text-gray-900">हिंदी</option>
-            </select>
+            <div className="flex items-center bg-white/10 rounded-lg p-0.5 border border-white/20 text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded ${language === 'en' ? 'bg-emerald-500 text-white' : 'text-emerald-100'}`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('mr')}
+                className={`px-2 py-0.5 rounded ${language === 'mr' ? 'bg-emerald-500 text-white' : 'text-emerald-100'}`}
+              >
+                मराठी
+              </button>
+            </div>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-white hover:bg-white/10"
+              aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
@@ -175,31 +203,53 @@ export const Navbar: React.FC = () => {
             <>
               <div className="pb-2 border-b border-white/10">
                 <p className="font-bold text-white">{user?.full_name}</p>
-                <p className="text-xs text-emerald-300">{user?.role} ({user?.district})</p>
+                <p className="text-xs text-emerald-300">
+                  {t(`roles.${user?.role.toLowerCase()}`, user?.role)} ({user?.district})
+                </p>
               </div>
-              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">Dashboard</Link>
+              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                {t('nav.dashboard')}
+              </Link>
               {user?.role === 'FARMER' && (
                 <>
-                  <Link to="/scan" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-bold">📷 Scan Crop Leaf</Link>
-                  <Link to="/farms" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">My Farms</Link>
-                  <Link to="/cases" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">My Escalated Cases</Link>
+                  <Link to="/scan" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-bold">
+                    📷 {t('nav.scanCrop')}
+                  </Link>
+                  <Link to="/farms" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                    {t('nav.myFarms')}
+                  </Link>
+                  <Link to="/cases" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                    {t('nav.cases')}
+                  </Link>
                 </>
               )}
               {user?.role === 'OFFICER' && (
-                <Link to="/officer/queue" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-amber-300 font-bold">Officer Review Queue</Link>
+                <Link to="/officer/queue" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-amber-300 font-bold">
+                  {t('nav.officerQueue')}
+                </Link>
               )}
               {user?.role === 'ADMIN' && (
                 <>
-                  <Link to="/gis-map" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">GIS Outbreak Map</Link>
-                  <Link to="/analytics" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">Analytics</Link>
+                  <Link to="/gis-map" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                    {t('nav.gisMap')}
+                  </Link>
+                  <Link to="/analytics" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                    {t('nav.analytics')}
+                  </Link>
                 </>
               )}
-              <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="block w-full text-left py-2 text-red-300 font-bold">Logout</button>
+              <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="block w-full text-left py-2 text-red-300 font-bold">
+                {t('nav.logout')}
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">Login</Link>
-              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-bold">Register</Link>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">
+                {t('nav.login')}
+              </Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-bold">
+                {t('nav.register')}
+              </Link>
             </>
           )}
         </div>

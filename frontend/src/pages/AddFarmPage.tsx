@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import { apiClient } from '../api/client';
 import { Sprout, MapPin, ArrowLeft } from 'lucide-react';
 
 export const AddFarmPage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [farmName, setFarmName] = useState('');
   const [district, setDistrict] = useState('Pune');
   const [taluka, setTaluka] = useState('Baramati');
@@ -35,7 +37,7 @@ export const AddFarmPage: React.FC = () => {
       });
       navigate('/farms');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to add farm plot.');
+      setError(err.response?.data?.detail || (language === 'mr' ? 'शेत जोडणे अयशस्वी झाले.' : 'Failed to add farm plot.'));
     } finally {
       setLoading(false);
     }
@@ -44,7 +46,7 @@ export const AddFarmPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <button onClick={() => navigate('/farms')} className="text-xs font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1 mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back to My Farms
+        <ArrowLeft className="w-4 h-4" /> {language === 'mr' ? 'माझ्या शेतांकडे परत जा' : 'Back to My Farms'}
       </button>
 
       <div className="bg-white rounded-3xl border border-earth-100 shadow-xl p-8">
@@ -53,8 +55,12 @@ export const AddFarmPage: React.FC = () => {
             <Sprout className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-gray-900">Add New Farm Plot</h2>
-            <p className="text-xs text-gray-500">Register crop land for GIS disease tracking</p>
+            <h2 className="text-xl font-extrabold text-gray-900">
+              {language === 'mr' ? 'नवीन शेत जोडा' : 'Add New Farm Plot'}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {language === 'mr' ? 'रोग ट्रॅकिंगसाठी शेत जमिनीची नोंदणी करा' : 'Register crop land for GIS disease tracking'}
+            </p>
           </div>
         </div>
 
@@ -66,7 +72,9 @@ export const AddFarmPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Farm / Plot Name</label>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('farms.farmName', 'Farm / Plot Name')}
+            </label>
             <input
               type="text"
               required
@@ -79,24 +87,28 @@ export const AddFarmPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">District</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('auth.districtLabel', 'District')}
+              </label>
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:outline-none"
               >
-                <option value="Pune">Pune</option>
-                <option value="Solapur">Solapur</option>
-                <option value="Satara">Satara</option>
-                <option value="Nashik">Nashik</option>
-                <option value="Kolhapur">Kolhapur</option>
-                <option value="Sangli">Sangli</option>
-                <option value="Ahmednagar">Ahmednagar</option>
-                <option value="Nanded">Nanded</option>
+                <option value="Pune">{language === 'mr' ? 'पुणे (Pune)' : 'Pune'}</option>
+                <option value="Solapur">{language === 'mr' ? 'सोलापूर (Solapur)' : 'Solapur'}</option>
+                <option value="Satara">{language === 'mr' ? 'सातारा (Satara)' : 'Satara'}</option>
+                <option value="Nashik">{language === 'mr' ? 'नाशिक (Nashik)' : 'Nashik'}</option>
+                <option value="Kolhapur">{language === 'mr' ? 'कोल्हापूर (Kolhapur)' : 'Kolhapur'}</option>
+                <option value="Sangli">{language === 'mr' ? 'सांगली (Sangli)' : 'Sangli'}</option>
+                <option value="Ahmednagar">{language === 'mr' ? 'अहमदनगर (Ahmednagar)' : 'Ahmednagar'}</option>
+                <option value="Nanded">{language === 'mr' ? 'नांदेड (Nanded)' : 'Nanded'}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Taluka</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('auth.talukaLabel', 'Taluka')}
+              </label>
               <input
                 type="text"
                 required
@@ -109,23 +121,26 @@ export const AddFarmPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Crop</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('farms.cropType', 'Current Crop')}
+              </label>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:outline-none"
               >
-                <option value="Tomato">Tomato</option>
-                <option value="Rice">Rice</option>
-                <option value="Soybean">Soybean</option>
-                <option value="Grape">Grape</option>
-                <option value="Grapes">Grapes</option>
-                <option value="Potato">Potato</option>
-                <option value="Cotton">Cotton</option>
+                <option value="Tomato">🍅 {language === 'mr' ? 'टोमॅटो (Tomato)' : 'Tomato'}</option>
+                <option value="Rice">🌾 {language === 'mr' ? 'भात (Rice)' : 'Rice'}</option>
+                <option value="Soybean">🌱 {language === 'mr' ? 'सोयाबीन (Soybean)' : 'Soybean'}</option>
+                <option value="Grape">🍇 {language === 'mr' ? 'द्राक्ष (Grape)' : 'Grape'}</option>
+                <option value="Potato">🥔 {language === 'mr' ? 'बटाटा (Potato)' : 'Potato'}</option>
+                <option value="Cotton">⚪ {language === 'mr' ? 'कापूस (Cotton)' : 'Cotton'}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Variety (Optional)</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {language === 'mr' ? 'वाण (पर्यायी)' : 'Variety (Optional)'}
+              </label>
               <input
                 type="text"
                 value={variety}
@@ -138,7 +153,9 @@ export const AddFarmPage: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Area (Acres)</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('farms.acreage', 'Area (Acres)')}
+              </label>
               <input
                 type="number"
                 step="0.5"
@@ -148,7 +165,9 @@ export const AddFarmPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Latitude</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {language === 'mr' ? 'अक्षांश (Lat)' : 'Latitude'}
+              </label>
               <input
                 type="number"
                 step="0.0001"
@@ -158,7 +177,9 @@ export const AddFarmPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Longitude</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {language === 'mr' ? 'रेखांश (Lng)' : 'Longitude'}
+              </label>
               <input
                 type="number"
                 step="0.0001"
@@ -174,7 +195,7 @@ export const AddFarmPage: React.FC = () => {
             disabled={loading}
             className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition-all mt-4"
           >
-            {loading ? 'Saving Farm Plot...' : 'Save Farm Plot'}
+            {loading ? t('farms.saving', 'Saving farm...') : t('farms.saveFarmBtn', 'Save Farm Plot')}
           </button>
         </form>
       </div>
