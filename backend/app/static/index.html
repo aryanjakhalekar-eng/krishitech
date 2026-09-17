@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrishiRakshak AI | Crop Disease Detection & Outbreak Intelligence</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS for Maharashtra GIS Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for Admin Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agri: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              800: '#166534',
+              900: '#14532d',
+            },
+            earth: {
+              50: '#fdfbf7',
+              100: '#f7f2e8',
+              500: '#a16207'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .leaflet-container { width: 100%; height: 420px; border-radius: 1rem; z-index: 10; }
+  </style>
+</head>
+<body class="bg-[#fcfbfa] text-gray-900 font-sans min-h-screen flex flex-col">
+
+  <!-- Navigation Bar -->
+  <header className="bg-gradient-to-r from-green-900 to-green-800 text-white shadow-lg sticky top-0 z-50">
+    <div id="offline-banner" class="hidden bg-amber-600 text-white text-xs font-semibold px-4 py-1 text-center">
+      ⚠️ OFFLINE MODE active. Scans queued locally in IndexedDB.
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#landing" onclick="showPage('landing')" class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
+          <div class="bg-white/10 p-2 rounded-xl border border-white/20">
+            <i data-lucide="shield" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <span>KrishiRakshak <span class="text-emerald-400">AI</span></span>
+        </a>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center gap-2 text-sm font-medium">
+          <button onclick="showPage('landing')" class="px-3 py-1.5 rounded-lg hover:bg-white/10">Home</button>
+          <button onclick="showPage('farmer-dash')" class="px-3 py-1.5 rounded-lg hover:bg-white/10">Farmer Dashboard</button>
+          <button onclick="showPage('scan-page')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 font-bold shadow">📷 Scan Crop</button>
+          <button onclick="showPage('officer-queue')" class="px-3 py-1.5 rounded-lg hover:bg-white/10 text-amber-300 font-semibold">Officer Queue</button>
+          <button onclick="showPage('gis-map')" class="px-3 py-1.5 rounded-lg hover:bg-white/10 text-blue-300 font-semibold">GIS Map</button>
+          <button onclick="showPage('admin-dash')" class="px-3 py-1.5 rounded-lg hover:bg-white/10 text-purple-300 font-semibold">Analytics</button>
+        </nav>
+
+        <!-- Language Selector & User Auth Controls -->
+        <div class="flex items-center gap-3 text-xs">
+          <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-white/10 text-white rounded-lg px-2.5 py-1.5 border border-white/20 cursor-pointer focus:outline-none">
+            <option value="en" class="text-gray-900">English</option>
+            <option value="mr" class="text-gray-900">मराठी (Marathi)</option>
+            <option value="hi" class="text-gray-900">हिंदी (Hindi)</option>
+          </select>
+
+          <div id="user-badge" class="hidden items-center gap-2 pl-2 border-l border-white/20">
+            <span id="user-name" class="font-bold"></span>
+            <button onclick="logout()" class="px-2.5 py-1 bg-red-600/80 hover:bg-red-600 rounded text-white font-bold">Logout</button>
+          </div>
+          <div id="auth-buttons" class="flex gap-2">
+            <button onclick="showPage('login')" class="px-3 py-1.5 hover:bg-white/10 rounded font-semibold">Login</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dynamic Main Content Container -->
+  <main id="app-container" class="flex-grow">
+    
+    <!-- PAGE 1: LANDING PAGE -->
+    <div id="page-landing" class="page-view space-y-12">
+      <section class="bg-gradient-to-b from-green-900 via-green-800 to-green-900 text-white py-16 px-4 text-center">
+        <div class="max-w-5xl mx-auto space-y-6">
+          <span class="inline-block bg-white/10 backdrop-blur px-4 py-1 rounded-full text-xs font-semibold text-emerald-300 border border-white/20">
+            ⚡ Smart India Hackathon (SIH) Prototype
+          </span>
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight">
+            KRISHIRAKSHAK <span class="text-emerald-400">AI</span>
+          </h1>
+          <p class="text-lg sm:text-2xl text-emerald-100 max-w-3xl mx-auto font-medium">
+            "AI-powered crop disease detection, safe advisory and outbreak intelligence for farmers."
+          </p>
+
+          <div class="pt-4 flex flex-wrap justify-center gap-4">
+            <button onclick="showPage('scan-page')" class="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 font-extrabold text-white rounded-2xl shadow-xl flex items-center gap-2">
+              <i data-lucide="camera" class="w-5 h-5"></i> Scan Crop Leaf Now
+            </button>
+            <button onclick="showPage('gis-map')" class="px-7 py-3.5 bg-white/10 hover:bg-white/20 font-bold text-white rounded-2xl border border-white/20 flex items-center gap-2">
+              <i data-lucide="map" class="w-5 h-5 text-blue-300"></i> Explore GIS Map
+            </button>
+          </div>
+
+          <!-- SIH Judge 1-Click Demo Logins -->
+          <div class="mt-10 max-w-3xl mx-auto bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-left shadow-2xl">
+            <h3 class="text-xs font-extrabold text-amber-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4"></i> SIH Judge 1-Click Preset Demo Logins
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button onclick="demoLogin('farmer@krishirakshak.in', 'farmer123', 'farmer-dash')" class="bg-emerald-800/80 hover:bg-emerald-700 p-3.5 rounded-xl border border-emerald-500/40 text-left transition-all">
+                <div class="font-bold text-sm text-emerald-200">🧑‍🌾 Farmer Dashboard</div>
+                <div class="text-[11px] text-emerald-300/80 mt-0.5">Ramesh Patil (Baramati)</div>
+              </button>
+              <button onclick="demoLogin('officer@krishirakshak.in', 'officer123', 'officer-queue')" class="bg-amber-800/80 hover:bg-amber-700 p-3.5 rounded-xl border border-amber-500/40 text-left transition-all">
+                <div class="font-bold text-sm text-amber-200">👮 Extension Officer</div>
+                <div class="text-[11px] text-amber-300/80 mt-0.5">Gram Sevak Suresh Kulkarni</div>
+              </button>
+              <button onclick="demoLogin('admin@krishirakshak.in', 'admin123', 'gis-map')" class="bg-blue-800/80 hover:bg-blue-700 p-3.5 rounded-xl border border-blue-500/40 text-left transition-all">
+                <div class="font-bold text-sm text-blue-200">🏛️ Admin & GIS Map</div>
+                <div class="text-[11px] text-blue-300/80 mt-0.5">Dr. Ananya Deshmukh</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Flowchart Diagram -->
+      <section class="max-w-7xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-extrabold text-gray-900 text-center mb-6">Operational Triage Flowchart</h2>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
+          <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm">
+            <div class="w-8 h-8 bg-green-800 text-white rounded-lg font-bold mx-auto mb-2 flex items-center justify-center">1</div>
+            <h4 class="font-bold text-sm">Photo Capture</h4>
+            <p class="text-xs text-gray-500 mt-1">Low-cost Android device</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm">
+            <div class="w-8 h-8 bg-green-800 text-white rounded-lg font-bold mx-auto mb-2 flex items-center justify-center">2</div>
+            <h4 class="font-bold text-sm">IQA Check</h4>
+            <p class="text-xs text-gray-500 mt-1">Laplacian Variance Blur Detection</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm">
+            <div class="w-8 h-8 bg-green-800 text-white rounded-lg font-bold mx-auto mb-2 flex items-center justify-center">3</div>
+            <h4 class="font-bold text-sm">Model Inference</h4>
+            <p class="text-xs text-gray-500 mt-1">Confidence C(x) & OOD D_M(x)</p>
+          </div>
+          <div class="bg-amber-50 p-5 rounded-2xl border border-amber-300 shadow-sm">
+            <div class="w-8 h-8 bg-amber-600 text-white rounded-lg font-bold mx-auto mb-2 flex items-center justify-center">4</div>
+            <h4 class="font-bold text-sm text-amber-950">AI Safety Gate</h4>
+            <p class="text-xs text-amber-900 mt-1">Pass vs Human Escalation</p>
+          </div>
+          <div class="bg-blue-50 p-5 rounded-2xl border border-blue-300 shadow-sm">
+            <div class="w-8 h-8 bg-blue-600 text-white rounded-lg font-bold mx-auto mb-2 flex items-center justify-center">5</div>
+            <h4 class="font-bold text-sm text-blue-950">GIS Intelligence</h4>
+            <p class="text-xs text-blue-900 mt-1">Maharashtra District Heatmap</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- PAGE 2: LOGIN PAGE -->
+    <div id="page-login" class="page-view hidden max-w-md mx-auto py-12 px-4">
+      <div class="bg-white rounded-3xl border border-earth-100 shadow-xl p-8 space-y-4">
+        <h2 class="text-2xl font-extrabold text-gray-900 text-center">Sign In</h2>
+        <div id="login-error" class="hidden bg-red-50 text-red-700 text-xs p-3 rounded-xl font-semibold"></div>
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase mb-1">Email</label>
+            <input type="email" id="login-email" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm" placeholder="farmer@krishirakshak.in">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase mb-1">Password</label>
+            <input type="password" id="login-pass" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm" placeholder="••••••••">
+          </div>
+          <button type="submit" class="w-full py-3 bg-green-800 text-white font-bold rounded-xl shadow">Sign In</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PAGE 3: FARMER DASHBOARD -->
+    <div id="page-farmer-dash" class="page-view hidden max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <div class="bg-gradient-to-r from-green-900 to-green-800 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <span class="bg-white/10 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">📍 Baramati, Pune</span>
+          <h2 class="text-3xl font-extrabold mt-2">Namaste, Farmer Ramesh Patil!</h2>
+          <p class="text-xs text-emerald-100 mt-1">Capture crop photographs to receive instant AI diagnosis or officer verification.</p>
+        </div>
+        <button onclick="showPage('scan-page')" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 font-extrabold text-lg text-white rounded-2xl shadow-xl flex items-center gap-2">
+          <i data-lucide="camera" class="w-6 h-6"></i> SCAN CROP NOW
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Weather Card -->
+        <div class="bg-white rounded-2xl border border-earth-100 p-6 shadow-sm">
+          <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🌤️ Weather & Crop Risk</h3>
+          <div id="weather-widget-container" class="space-y-3 text-xs">
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+              <span class="text-2xl font-extrabold text-amber-900 block">26.2°C</span>
+              <span class="text-gray-600">Humidity: 78.0% • Rainfall: 12.0 mm</span>
+            </div>
+            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 font-bold text-emerald-900">
+              Local Risk Level: <span class="text-emerald-700 font-extrabold">LOW RISK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Cases -->
+        <div class="bg-white rounded-2xl border border-earth-100 p-6 shadow-sm">
+          <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">⚠️ Active Officer Cases</h3>
+          <div id="farmer-cases-container" class="space-y-2 text-xs">
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+              <div class="font-bold">Case #2 — Tomato (Late Blight)</div>
+              <div class="text-gray-500 mt-0.5">Status: UNDER_REVIEW by Gram Sevak</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Farms -->
+        <div class="bg-white rounded-2xl border border-earth-100 p-6 shadow-sm">
+          <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🌱 My Registered Farms</h3>
+          <div class="space-y-2 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+              <div class="font-bold">Patil Tomato & Soybean Estate</div>
+              <div class="text-gray-500">3.5 Acres • Baramati, Pune</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 4: SCAN CROP PAGE -->
+    <div id="page-scan-page" class="page-view hidden max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div class="text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900">Scan Crop Leaf</h2>
+        <p class="text-xs text-gray-600 mt-1">Upload or capture a leaf photo for AI Safety Gate analysis</p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-earth-100 shadow-xl p-8 space-y-6">
+        <div>
+          <label class="block text-xs font-bold uppercase mb-2">Select Crop</label>
+          <select id="scan-crop-select" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold">
+            <option value="Tomato">Tomato</option>
+            <option value="Soybean">Soybean</option>
+            <option value="Rice">Rice</option>
+            <option value="Grapes">Grapes</option>
+            <option value="Potato">Potato</option>
+            <option value="Cotton">Cotton</option>
+          </select>
+        </div>
+
+        <div class="border-2 border-dashed border-emerald-300 bg-emerald-50/40 rounded-2xl p-6 text-center space-y-4">
+          <div id="preview-box" class="hidden max-w-xs mx-auto">
+            <img id="preview-img" src="" class="rounded-2xl max-h-64 object-cover border-2 border-emerald-500 mx-auto" />
+          </div>
+          <div id="upload-placeholder" class="py-4 space-y-2">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto font-bold text-2xl">📷</div>
+            <p class="font-bold text-sm">Choose or Capture Photo</p>
+          </div>
+
+          <input type="file" id="image-file-input" accept="image/*" onchange="handleFileSelect(event)" class="hidden" />
+          <button onclick="document.getElementById('image-file-input').click()" class="px-6 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">Select Image File</button>
+
+          <div class="pt-4 border-t border-emerald-200 text-xs">
+            <span class="font-bold text-gray-600 block mb-2">SIH Demo Presets:</span>
+            <div class="flex justify-center gap-2">
+              <button onclick="loadPresetImage('clear')" class="px-3 py-1.5 bg-white border border-emerald-400 font-bold text-emerald-900 rounded">🌿 Clear Leaf (Pass Demo)</button>
+              <button onclick="loadPresetImage('blurry')" class="px-3 py-1.5 bg-white border border-amber-400 font-bold text-amber-900 rounded">🌫️ Blurry Leaf (Retry Demo)</button>
+              <button onclick="loadPresetImage('ood')" class="px-3 py-1.5 bg-white border border-blue-400 font-bold text-blue-900 rounded">❓ OOD Leaf (Escalation Demo)</button>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="executeScanAnalysis()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base rounded-2xl shadow-lg">
+          Run AI Disease Analysis & Safety Gate
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE 5: DISEASE RESULT PAGE -->
+    <div id="page-scan-result" class="page-view hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <div id="result-content-container"></div>
+    </div>
+
+    <!-- PAGE 6: OFFICER QUEUE PAGE -->
+    <div id="page-officer-queue" class="page-view hidden max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div class="bg-amber-900 text-white rounded-3xl p-8 shadow-xl">
+        <h2 class="text-3xl font-extrabold">Extension Officer Queue (Gram Sevak)</h2>
+        <p class="text-xs text-amber-200 mt-1">Review escalated low-confidence & OOD cases before emitting farm advisories.</p>
+      </div>
+      <div id="officer-cases-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </div>
+
+    <!-- PAGE 7: GIS OUTBREAK MAP PAGE -->
+    <div id="page-gis-map" class="page-view hidden max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-extrabold text-gray-900">Maharashtra GIS Outbreak Map</h2>
+          <p class="text-xs text-gray-500 mt-1">Interactive district/taluka disease hotspots & risk intelligence</p>
+        </div>
+      </div>
+      <div id="leaflet-map-container" class="w-full h-[500px]"></div>
+    </div>
+
+    <!-- PAGE 8: ADMIN ANALYTICS PAGE -->
+    <div id="page-admin-dash" class="page-view hidden max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <h2 class="text-3xl font-extrabold text-gray-900">Executive Admin & AI Model Intelligence</h2>
+      <div id="admin-metrics-container" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    </div>
+
+  </main>
+
+  <!-- App Script Logic -->
+  <script>
+    const API_BASE = '/api';
+    let currentToken = localStorage.getItem('krishirakshak_token') || '';
+    let currentUser = null;
+    let selectedImageBase64 = null;
+    let mapInstance = null;
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById('page-' + pageId);
+      if (target) target.classList.remove('hidden');
+
+      if (pageId === 'gis-map') {
+        setTimeout(initGISMap, 200);
+      } else if (pageId === 'officer-queue') {
+        loadOfficerQueue();
+      } else if (pageId === 'admin-dash') {
+        loadAdminAnalytics();
+      }
+    }
+
+    function changeLanguage(lang) {
+      localStorage.setItem('krishirakshak_lang', lang);
+      alert('Language switched to: ' + lang.toUpperCase());
+    }
+
+    async function demoLogin(email, password, targetPage) {
+      try {
+        const res = await fetch(API_BASE + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          currentToken = data.access_token;
+          localStorage.setItem('krishirakshak_token', currentToken);
+          currentUser = data;
+          document.getElementById('user-name').innerText = data.full_name;
+          document.getElementById('user-badge').classList.remove('hidden');
+          document.getElementById('user-badge').classList.add('flex');
+          document.getElementById('auth-buttons').classList.add('hidden');
+          showPage(targetPage);
+        } else {
+          alert('Login failed: ' + data.detail);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          selectedImageBase64 = reader.result;
+          document.getElementById('preview-img').src = selectedImageBase64;
+          document.getElementById('preview-box').classList.remove('hidden');
+          document.getElementById('upload-placeholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function loadPresetImage(type) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 300; canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      if (type === 'clear') {
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(0,0,300,300);
+        ctx.fillStyle = '#a16207'; ctx.beginPath(); ctx.arc(150,150,40,0,2*Math.PI); ctx.fill();
+      } else if (type === 'blurry') {
+        ctx.fillStyle = '#4ade80'; ctx.fillRect(0,0,300,300);
+      } else {
+        ctx.fillStyle = '#3b82f6'; ctx.fillRect(0,0,300,300);
+      }
+      selectedImageBase64 = canvas.toDataURL('image/jpeg');
+      document.getElementById('preview-img').src = selectedImageBase64;
+      document.getElementById('preview-box').classList.remove('hidden');
+      document.getElementById('upload-placeholder').classList.add('hidden');
+    }
+
+    async function executeScanAnalysis() {
+      if (!selectedImageBase64) {
+        alert('Please select or capture a crop leaf photo first.');
+        return;
+      }
+      const crop = document.getElementById('scan-crop-select').value;
+      try {
+        const res = await fetch(API_BASE + '/scans/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+          },
+          body: JSON.stringify({ crop, image_base64: selectedImageBase64 })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          renderScanResult(data);
+          showPage('scan-result');
+        } else {
+          alert('Analysis Error: ' + (data.detail || 'Failed'));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderScanResult(res) {
+      const isPassed = res.safety_gate.gate_passed;
+      const container = document.getElementById('result-content-container');
+      container.innerHTML = `
+        <div class="bg-white rounded-3xl border border-earth-100 shadow-xl p-8 space-y-6">
+          <div class="flex justify-between items-start border-b pb-4">
+            <div>
+              <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">${res.crop} Crop Diagnosis</span>
+              <h1 class="text-3xl font-extrabold text-gray-900 mt-2">${res.predicted_disease}</h1>
+              <p class="text-xs text-gray-500 mt-1">${res.inference_note}</p>
+            </div>
+            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center">
+              <span class="text-3xl font-extrabold text-emerald-800">${res.confidence_percentage}%</span>
+              <span class="block text-[10px] font-bold text-emerald-700 uppercase">AI Confidence</span>
+            </div>
+          </div>
+
+          <!-- AI Safety Badge -->
+          <div class="p-5 rounded-2xl border-2 ${isPassed ? 'bg-emerald-50 border-emerald-500 text-emerald-950' : 'bg-amber-50 border-amber-500 text-amber-950'}">
+            <div class="font-extrabold text-lg">${res.safety_gate.display_title}</div>
+            <p class="text-xs mt-1">${res.safety_gate.display_message}</p>
+            <div class="text-[11px] font-mono mt-2 bg-white/60 p-2 rounded">${res.safety_gate.reason}</div>
+          </div>
+
+          <!-- Stepped IPM Advisory -->
+          <div class="bg-white border rounded-2xl p-5 space-y-4">
+            <h3 class="font-bold text-base text-gray-900">WHAT SHOULD YOU DO? (Stepped IPM Advisory)</h3>
+            <div class="border-l-4 border-emerald-500 pl-3">
+              <span class="font-bold text-xs text-emerald-800">1. Cultural Control</span>
+              <p class="text-xs text-gray-700">${res.advisory.cultural_control}</p>
+            </div>
+            <div class="border-l-4 border-blue-500 pl-3">
+              <span class="font-bold text-xs text-blue-800">2. Biological Control</span>
+              <p class="text-xs text-gray-700">${res.advisory.biological_control}</p>
+            </div>
+            <div class="border-l-4 border-purple-500 pl-3">
+              <span class="font-bold text-xs text-purple-800">3. Approved Chemical Control</span>
+              <p class="text-xs text-gray-800 font-bold">${res.advisory.approved_chemical_control}</p>
+            </div>
+            <div class="bg-red-50 text-red-900 p-3 rounded-xl text-xs font-semibold">
+              ⚠️ Safety Warning: ${res.advisory.safety_warning}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadOfficerQueue() {
+      const container = document.getElementById('officer-cases-list');
+      try {
+        const res = await fetch(API_BASE + '/cases?status_filter=PENDING', {
+          headers: { 'Authorization': 'Bearer ' + currentToken }
+        });
+        const cases = await res.json();
+        container.innerHTML = cases.map(c => `
+          <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
+            <div class="flex justify-between font-bold text-sm">
+              <span>Case #${c.id} — ${c.crop}</span>
+              <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs">${c.status}</span>
+            </div>
+            <p class="text-xs text-gray-600">Location: ${c.taluka}, ${c.district}</p>
+            <p class="text-xs text-red-700 font-bold">Suspected: ${c.predicted_disease}</p>
+            <p class="text-[11px] bg-amber-50 p-2 rounded text-amber-900">Escalation: ${c.escalation_reason}</p>
+          </div>
+        `).join('');
+      } catch (err) { console.error(err); }
+    }
+
+    async function initGISMap() {
+      if (mapInstance) return;
+      mapInstance = L.map('leaflet-map-container').setView([18.8, 75.8], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(mapInstance);
+
+      try {
+        const res = await fetch(API_BASE + '/outbreaks/hotspots');
+        const hotspots = await res.json();
+        hotspots.forEach(h => {
+          L.circleMarker([h.lat, h.lng], {
+            radius: 16,
+            color: h.risk_level === 'High' ? '#ef4444' : '#f59e0b',
+            fillColor: h.risk_level === 'High' ? '#f87171' : '#fbbf24',
+            fillOpacity: 0.5
+          }).addTo(mapInstance).bindPopup(`
+            <b>${h.district} (${h.taluka})</b><br/>
+            Crop: ${h.crop}<br/>
+            Outbreak: ${h.disease}<br/>
+            Active Cases: ${h.cases_count}
+          `);
+        });
+      } catch (err) { console.error(err); }
+    }
+
+    async function loadAdminAnalytics() {
+      const container = document.getElementById('admin-metrics-container');
+      try {
+        const res = await fetch(API_BASE + '/analytics/overview', {
+          headers: { 'Authorization': 'Bearer ' + currentToken }
+        });
+        const m = await res.json();
+        container.innerHTML = `
+          <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-xs font-bold text-gray-500">Farmers</span><div class="text-2xl font-extrabold mt-1">${m.total_farmers}</div></div>
+          <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-xs font-bold text-gray-500">Crop Scans</span><div class="text-2xl font-extrabold mt-1">${m.total_scans}</div></div>
+          <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-xs font-bold text-gray-500">AI Escalation %</span><div class="text-2xl font-extrabold text-amber-700 mt-1">${m.ai_escalation_rate}%</div></div>
+          <div class="bg-white p-5 rounded-2xl border shadow-sm"><span class="text-xs font-bold text-gray-500">Officer Verification %</span><div class="text-2xl font-extrabold text-purple-700 mt-1">${m.officer_verification_rate}%</div></div>
+        `;
+      } catch (err) { console.error(err); }
+    }
+
+    window.onload = () => {
+      lucide.createIcons();
+      showPage('landing');
+    };
+  </script>
+</body>
+</html>

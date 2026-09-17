@@ -1,0 +1,43 @@
+{
+  "appName": "KrishiRakshak AI",
+  "tagline": "AI-powered crop disease detection, safe advisory and outbreak intelligence for farmers.",
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "myFarms": "My Farms",
+    "scanCrop": "Scan Crop",
+    "scanHistory": "History",
+    "cases": "Officer Cases",
+    "gisMap": "GIS Outbreak Map",
+    "analytics": "Analytics",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "roles": {
+    "farmer": "Farmer",
+    "officer": "Extension Officer",
+    "admin": "Admin"
+  },
+  "scan": {
+    "title": "Scan Crop Leaf",
+    "subtitle": "Capture or upload a clear photo of your crop leaf for instant AI disease detection.",
+    "selectCrop": "Select Crop Type",
+    "selectFarm": "Select Farm (Optional)",
+    "takePhoto": "Take Photo / Upload",
+    "analyzing": "Analyzing Image Quality & AI Confidence...",
+    "safetyGatePassed": "AI Safety Check: PASSED",
+    "safetyGateFailed": "AI Safety Check: HUMAN VERIFICATION REQUIRED",
+    "iqaGood": "Image Quality: GOOD",
+    "iqaPoor": "Image Quality: POOR - Please retake photo",
+    "retakeButton": "Retake Clear Photo",
+    "trackCaseButton": "Track My Case"
+  },
+  "ipm": {
+    "title": "What Should You Do? (Stepped IPM Advisory)",
+    "cultural": "1. Cultural Control",
+    "biological": "2. Biological Control",
+    "chemical": "3. Approved Chemical Control",
+    "safetyWarning": "Safety Warning & PPE Guidelines"
+  }
+}

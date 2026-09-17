@@ -1,0 +1,71 @@
+{
+  "RandomForest": {
+    "accuracy": 0.7645,
+    "precision": 0.4942,
+    "recall": 0.3914,
+    "f1_score": 0.389,
+    "confusion_matrix": [
+      [
+        17,
+        0,
+        66
+      ],
+      [
+        0,
+        1,
+        81
+      ],
+      [
+        21,
+        3,
+        537
+      ]
+    ]
+  },
+  "GradientBoosting": {
+    "accuracy": 0.7631,
+    "precision": 0.541,
+    "recall": 0.4046,
+    "f1_score": 0.4056,
+    "confusion_matrix": [
+      [
+        20,
+        0,
+        63
+      ],
+      [
+        0,
+        2,
+        80
+      ],
+      [
+        26,
+        3,
+        532
+      ]
+    ]
+  },
+  "LogisticRegression": {
+    "accuracy": 0.7672,
+    "precision": 0.4224,
+    "recall": 0.4062,
+    "f1_score": 0.4016,
+    "confusion_matrix": [
+      [
+        22,
+        0,
+        61
+      ],
+      [
+        0,
+        0,
+        82
+      ],
+      [
+        24,
+        2,
+        535
+      ]
+    ]
+  }
+}

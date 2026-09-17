@@ -1,0 +1,188 @@
+import React from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { ScanAnalysisResponse } from '../types';
+import { AISafetyBadge } from '../components/AISafetyBadge';
+import { IQAGauge } from '../components/IQAGauge';
+import { IPMAdvisoryCard } from '../components/IPMAdvisoryCard';
+import { ArrowLeft, AlertTriangle, ShieldCheck, Activity } from 'lucide-react';
+
+export const DiseaseResultPage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const result: ScanAnalysisResponse = location.state?.result;
+
+  if (!result) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center">
+        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+        <h3 className="text-xl font-bold text-gray-900">No Analysis Result Available</h3>
+        <p className="text-xs text-gray-500 mt-1 mb-6">Please scan a crop leaf image first.</p>
+        <Link to="/scan" className="px-6 py-3 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">
+          Go to Scan Page
+        </Link>
+      </div>
+    );
+  }
+
+  const {
+    crop,
+    predicted_disease,
+    confidence_percentage,
+    iqa,
+    ood,
+    severity,
+    safety_gate,
+    advisory,
+    escalated_case_id,
+    inference_note
+  } = result;
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      
+      <button onClick={() => navigate('/scan')} className="text-xs font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1">
+        <ArrowLeft className="w-4 h-4" /> Scan Another Crop
+      </button>
+
+      {/* Crop Mismatch Auto-Correction Notice */}
+      {result.crop_mismatch && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900 bg-amber-200/90 px-2.5 py-0.5 rounded-full">
+                  Crop Auto-Corrected
+                </span>
+                <span className="text-xs font-bold text-amber-900">
+                  {((result.crop_classifier_confidence || 0.99) * 100).toFixed(1)}% Leaf Match
+                </span>
+              </div>
+              <h3 className="text-base font-extrabold text-amber-950 mt-1">
+                Crop Mismatch Detected — Routed to {result.detected_crop}
+              </h3>
+              <p className="text-xs font-medium text-amber-900 mt-1 max-w-xl leading-relaxed">
+                {result.mismatch_message || `This image was identified as a ${result.detected_crop} leaf, although ${result.selected_crop} was selected. The AI has automatically applied the ${result.detected_crop} disease classifier and IPM advisory.`}
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-[11px] font-bold">
+                <span className="bg-white border border-amber-200 text-gray-700 px-2.5 py-0.5 rounded-md">
+                  Selected: <span className="text-red-700">{result.selected_crop}</span>
+                </span>
+                <span className="bg-white border border-emerald-300 text-emerald-800 px-2.5 py-0.5 rounded-md">
+                  AI Verified: <span className="text-emerald-700">{result.detected_crop}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/scan?crop=${result.detected_crop}`)}
+            className="whitespace-nowrap px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow transition-all self-end sm:self-center"
+          >
+            Set {result.detected_crop} for Next Scan →
+          </button>
+        </div>
+      )}
+
+      {/* Header Banner */}
+      <div className="bg-white rounded-3xl border border-earth-100 shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-6">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                Target: {result.selected_crop || crop}
+              </span>
+              <span className={`text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full ${result.detected_crop === (result.selected_crop || crop) ? 'text-blue-800 bg-blue-100' : 'text-amber-900 bg-amber-200'}`}>
+                Detected: {result.detected_crop || crop}
+              </span>
+              {result.domain_status && (
+                <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-md ${result.domain_status.includes('MISMATCH') || result.domain_status.includes('OOD') ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+                  {result.domain_status}
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+              {predicted_disease}
+            </h1>
+            <p className="text-xs text-gray-500 font-mono">{inference_note}</p>
+          </div>
+
+          <div className="text-right sm:text-right bg-emerald-50/80 p-4 rounded-2xl border border-emerald-100 min-w-[140px]">
+            <span className="text-3xl font-extrabold text-emerald-800">{confidence_percentage}%</span>
+            <p className="text-[11px] text-emerald-700 font-bold uppercase tracking-wider">AI Confidence Score</p>
+          </div>
+        </div>
+
+        {/* 1. CORE FEATURE: AI SAFETY GATE BADGE */}
+        {safety_gate && <AISafetyBadge result={safety_gate} />}
+
+        {/* 2. Key Metrics Grid: IQA, OOD Distance, Severity % */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* IQA */}
+          {iqa && <IQAGauge iqa={iqa} />}
+
+          {/* OOD Score */}
+          {ood && (
+            <div className="p-4 rounded-xl border bg-blue-50/60 border-blue-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                  <Activity className="w-4 h-4 text-blue-600" />
+                  OOD Mahalanobis Distance
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${ood.is_ood ? 'bg-amber-200 text-amber-900' : 'bg-blue-200 text-blue-900'}`}>
+                  {ood.status}
+                </span>
+              </div>
+              <div className="mt-2">
+                <div className="text-2xl font-extrabold text-blue-950">{ood.mahalanobis_distance}</div>
+                <p className="text-[11px] text-blue-800 mt-0.5">Threshold: {ood.ood_threshold}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Damage Severity */}
+          {severity && (
+            <div className="p-4 rounded-xl border bg-amber-50/60 border-amber-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold text-xs text-amber-900 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  Damage Severity
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                  {severity.severity_level}
+                </span>
+              </div>
+              <div className="mt-2">
+                <div className="text-2xl font-extrabold text-amber-950">{severity.affected_area_percent}%</div>
+                <p className="text-[11px] text-amber-800 mt-0.5">Estimated Leaf Lesion Area</p>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* 3. STEPPED IPM ADVISORY CARD */}
+        {advisory && <IPMAdvisoryCard advisory={advisory} />}
+
+        {/* Case Escalation Button if Safety Gate Failed */}
+        {escalated_case_id && (
+          <div className="bg-amber-100/70 border border-amber-300 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h4 className="font-bold text-sm text-amber-950">Case #{escalated_case_id} Sent to Agricultural Officer</h4>
+              <p className="text-xs text-amber-900 mt-0.5">Your local Gram Sevak will inspect this scan and issue verified guidance.</p>
+            </div>
+            <Link
+              to="/cases"
+              className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow transition-all whitespace-nowrap"
+            >
+              Track Case Status
+            </Link>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+};

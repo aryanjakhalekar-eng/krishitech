@@ -1,0 +1,12 @@
+{
+  "classes": [
+    "blast",
+    "brown_spot",
+    "healthy"
+  ],
+  "class_to_idx": {
+    "blast": 0,
+    "brown_spot": 1,
+    "healthy": 2
+  }
+}

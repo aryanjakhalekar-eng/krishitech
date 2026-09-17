@@ -1,0 +1,14 @@
+{
+  "classes": [
+    "bacterial_spot",
+    "early_blight",
+    "healthy",
+    "late_blight"
+  ],
+  "class_to_idx": {
+    "bacterial_spot": 0,
+    "early_blight": 1,
+    "healthy": 2,
+    "late_blight": 3
+  }
+}
