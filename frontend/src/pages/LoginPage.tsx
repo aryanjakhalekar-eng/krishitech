@@ -11,8 +11,20 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === 'OFFICER') {
+        navigate('/officer/queue', { replace: true });
+      } else if (user.role === 'ADMIN') {
+        navigate('/analytics', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isLoading, isAuthenticated, user, navigate]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +46,17 @@ export const LoginPage: React.FC = () => {
       if (data.role === 'OFFICER') {
         navigate('/officer/queue');
       } else if (data.role === 'ADMIN') {
-        navigate('/gis-map');
+        navigate('/analytics');
       } else {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || (language === 'mr' ? 'लॉगिन अयशस्वी झाले. कृपया ईमेल व पासवर्ड तपासा.' : 'Login failed. Please check credentials.'));
+      const isNet = err.code === 'ERR_NETWORK' || !err.response;
+      if (isNet) {
+        setError(language === 'mr' ? 'कृषिरक्षक AI सर्व्हरशी संपर्क होऊ शकला नाही. कृपया बॅकएंड सर्व्हर चालू असल्याची खात्री करा.' : 'Unable to connect to KrishiRakshak AI server. Please make sure the backend is running.');
+      } else {
+        setError(err.response?.data?.detail || (language === 'mr' ? 'लॉगिन अयशस्वी झाले. कृपया ईमेल व पासवर्ड तपासा.' : 'Login failed. Please check credentials.'));
+      }
     } finally {
       setLoading(false);
     }

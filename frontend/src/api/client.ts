@@ -21,6 +21,16 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('krishirakshak_token');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const resolveImageUrl = (url?: string | null): string => {
   if (!url) return '';
   if (

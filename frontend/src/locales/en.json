@@ -1,6 +1,6 @@
 {
-  "appName": "KrishiRakshak AI",
-  "tagline": "AI-Powered Crop Disease Detection, Safe Advisory & Outbreak Intelligence for Farmers.",
+  "appName": "KRISHIRAKSHAK AI",
+  "tagline": "AI-powered crop disease detection, safe advisory and outbreak intelligence for farmers.",
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -17,7 +17,18 @@
     "language": "Language",
     "english": "English",
     "marathi": "मराठी",
-    "offlineBanner": "OFFLINE MODE active. Scans will be queued locally"
+    "offlineBanner": "OFFLINE MODE active. Scans will be queued locally",
+    "about": "About",
+    "features": "Features",
+    "crops": "Crops",
+    "contact": "Contact",
+    "history": "History",
+    "weather": "Weather",
+    "recommendations": "Recommendations",
+    "profile": "Profile",
+    "settings": "Settings",
+    "sidebarPromo": "Empowering Farmers for a Better Tomorrow",
+    "farmerRole": "Farmer"
   },
   "roles": {
     "farmer": "Farmer",
@@ -26,14 +37,16 @@
   },
   "hero": {
     "badge": "AI-Powered Crop Disease Detection Platform",
-    "title": "KRISHIRAKSHAK",
+    "title": "KRISHIRAKSHAK AI",
     "ai": "AI",
     "subtitle": "AI-powered crop disease detection, safe advisory and outbreak intelligence for farmers.",
     "desc": "Offline-First Crop Disease Identification, Safe Triage & Outbreak Intelligence System for Maharashtra Farmers.",
-    "scanBtn": "Scan Crop Leaf Now",
+    "scanBtn": "Scan Your Crop",
     "exploreMapBtn": "Explore GIS Outbreak Map",
     "quickLoginTitle": "Quick Login — Demo Credentials",
-    "instantNotice": "Click any role below for 1-click instant login demonstration:"
+    "instantNotice": "Click any role below for 1-click instant login demonstration:",
+    "tagline": "Healthy Crops | Prosperous Farmers | Sustainable Future",
+    "exploreBtn": "Explore KrishiRakshak"
   },
   "stats": {
     "accuracy": "99.4% Multi-Crop Accuracy",
@@ -254,5 +267,99 @@
     "rights": "All rights reserved.",
     "tagline": "KrishiRakshak AI — Agricultural Disease Detection & Advisory System for Maharashtra Farmers.",
     "privacy": "Offline First • Non-Generative Verified IPM • Built for Smart Agriculture"
+  },
+  "navSubtitle": "AI for Healthy Crops",
+  "weatherCard": {
+    "title": "Weather & Crop Risk",
+    "location": "Pune, Maharashtra",
+    "condition": "Partly Cloudy",
+    "humidity": "Humidity",
+    "rain": "Rain",
+    "cropRisk": "Crop Risk",
+    "weatherRisk": "Weather Risk",
+    "pestRisk": "Pest Risk",
+    "low": "Low",
+    "moderate": "Moderate",
+    "medium": "Medium",
+    "high": "High",
+    "unavailable": "Data unavailable"
+  },
+  "statusCards": {
+    "cropHealthTitle": "Crop Health",
+    "cropHealthVal": "Healthy",
+    "cropHealthSub": "No major issues detected",
+    "diseaseRiskTitle": "Disease Risk",
+    "diseaseRiskVal": "Low",
+    "diseaseRiskSub": "Minimal risk in your area",
+    "pestRiskTitle": "Pest Risk",
+    "pestRiskVal": "Moderate",
+    "pestRiskSub": "Monitor for early signs",
+    "weatherRiskTitle": "Weather Risk",
+    "weatherRiskVal": "Low",
+    "weatherRiskSub": "Favorable conditions"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "scanCrop": "Scan Crop",
+    "scanCropSub": "Upload and analyze crop image",
+    "takePhoto": "Take Photo",
+    "takePhotoSub": "Open camera on mobile",
+    "uploadImage": "Upload Image",
+    "uploadImageSub": "Select from device",
+    "viewHistory": "View History",
+    "viewHistorySub": "Previous scans",
+    "weather": "Weather",
+    "weatherSub": "View weather info"
+  },
+  "latestDiagnosis": {
+    "title": "Latest Diagnosis",
+    "confidence": "Confidence",
+    "damageSeverity": "Damage Severity",
+    "scanDate": "Scan Date",
+    "viewDetails": "View Details",
+    "mediumRisk": "Medium Risk",
+    "noScans": "No recent scans"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "viewAll": "View All →",
+    "scanCompleted": "New scan completed",
+    "farmRegistered": "Farm registered",
+    "advisoryUpdated": "Advisory updated",
+    "hoursAgo": "hours ago",
+    "dayAgo": "day ago",
+    "highRisk": "High Risk",
+    "lowRisk": "Low Risk",
+    "pastScans": "Past Scans"
+  },
+  "mobileNav": {
+    "home": "Home",
+    "scan": "Scan",
+    "history": "History",
+    "farms": "Farms",
+    "profile": "Profile"
+  },
+  "pipeline": {
+    "title": "AI Analysis Pipeline",
+    "step1": "1. Image Quality Assessment",
+    "step2": "2. Plant Verification",
+    "step3": "3. Crop Identification",
+    "step4": "4. Disease Detection",
+    "step5": "5. OOD & Safety Check",
+    "step6": "6. Advisory Generation"
+  },
+  "analysisChecklist": {
+    "title": "How AI Analyzed Your Image",
+    "iqa": "Image Quality",
+    "plant": "Plant Verified",
+    "crop": "Crop Identified",
+    "disease": "Disease Classified",
+    "safety": "Safety Check"
+  },
+  "advisoryTabs": {
+    "title": "What Should You Do?",
+    "cultural": "Cultural",
+    "biological": "Biological",
+    "chemical": "Chemical"
   }
 }

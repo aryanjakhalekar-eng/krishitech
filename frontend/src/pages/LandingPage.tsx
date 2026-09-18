@@ -40,16 +40,20 @@ export const LandingPage: React.FC = () => {
             {t('hero.badge')}
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl mx-auto">
-            {t('hero.title')} <span className="text-emerald-400">{t('hero.ai')}</span>
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight max-w-4xl mx-auto">
+            KRISHIRAKSHAK <span className="text-emerald-400">AI</span>
           </h1>
 
-          <p className="text-lg sm:text-2xl text-emerald-100/90 font-medium max-w-3xl mx-auto mt-4 leading-relaxed">
-            "{t('hero.subtitle')}"
+          <p className="text-base sm:text-xl text-emerald-100/90 font-medium max-w-3xl mx-auto mt-4 leading-relaxed whitespace-pre-line">
+            {language === 'mr'
+              ? 'AI च्या मदतीने पिकांचे रोग व किडी ओळखा,\nसुरक्षित सल्ला मिळवा आणि रोगांच्या प्रादुर्भावाची\nवेळीच माहिती मिळवा.'
+              : 'AI-powered crop disease detection, safe advisory and outbreak intelligence for farmers.'}
           </p>
 
-          <p className="text-xs sm:text-sm text-emerald-200/70 max-w-2xl mx-auto mt-3">
-            {t('hero.desc')}
+          <p className="text-xs sm:text-sm text-emerald-300 font-bold max-w-2xl mx-auto mt-2">
+            {language === 'mr'
+              ? 'निरोगी पिके | समृद्ध शेतकरी | शाश्वत भविष्य'
+              : 'Healthy Crops | Prosperous Farmers | Sustainable Future'}
           </p>
 
           {/* Call-to-action buttons */}

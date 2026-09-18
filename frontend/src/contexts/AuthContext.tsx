@@ -20,19 +20,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const fetchMe = async () => {
-      if (token) {
+      const storedToken = localStorage.getItem('krishirakshak_token');
+      if (storedToken) {
         try {
-          const res = await apiClient.get('/api/auth/me');
-          setUser(res.data);
+          const res = await apiClient.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${storedToken}` }
+          });
+          if (res.data && res.data.id && res.data.role) {
+            setUser(res.data);
+            setToken(storedToken);
+          } else {
+            logout();
+          }
         } catch (err) {
-          console.error('Failed to validate session token:', err);
+          console.warn('Session token invalid or expired, clearing session:', err);
           logout();
         }
+      } else {
+        setUser(null);
+        setToken(null);
       }
       setIsLoading(false);
     };
     fetchMe();
-  }, [token]);
+  }, []);
 
   const login = (newToken: string, userData: User) => {
     localStorage.setItem('krishirakshak_token', newToken);
